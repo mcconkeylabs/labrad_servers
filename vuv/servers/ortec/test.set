@@ -1,0 +1,32 @@
+[Display]
+LogScale=0
+nBins=1024
+Graticule=1
+EvColors=16, 10, 8, 4, 7, 2
+HScale=10
+FvColors=8, 11, 5, 5, 6, 2
+yProportion=0.2466
+FullView=1
+Start=0
+FillMode=0
+WrapMode=0
+Marker=0
+yRelation=0.0
+xRelation=0.4975
+VScale=8
+xProportion=0.5025
+[Hardware]
+LLSCA=1.5
+SumMode=1
+Ramp=2 0.0 0 0.0
+ULSCA=6.5
+ExtTrig=1
+InpSel=1
+Dwell=None
+InpImpFifty=1
+PassLen=1024
+DiscRise=1
+RepSum=1
+Preset=1
+DiscV=0.92
+ExtDwlThrsh=1.2

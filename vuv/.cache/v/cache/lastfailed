@@ -1,0 +1,19 @@
+{
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_add_comment": true, 
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_add_data_extended": true, 
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_add_data_simple": true, 
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_add_one_parameter": true, 
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_add_two_parameters": true, 
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_init_create_extended": true, 
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_init_create_simple": true, 
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_keep_streaming": true, 
+  "servers/datavault/test/test_datavault_package.py::DatasetTest::test_save_reload_data_extended": true, 
+  "servers/datavault/test/test_datavault_package.py::SessionTest::test_add_new_dataset": true, 
+  "servers/datavault/test/test_datavault_package.py::SessionTest::test_add_new_tags": true, 
+  "servers/datavault/test/test_datavault_package.py::SessionTest::test_get_tags": true, 
+  "servers/datavault/test/test_datavault_package.py::SessionTest::test_remove_tags": true, 
+  "servers/datavault/test/test_datavault_package.py::SessionTest::test_save_reload_dataset": true, 
+  "servers/datavault/test/test_datavault_package.py::SessionTest::test_toggle_tags": true, 
+  "servers/datavault/test/test_server.py": true, 
+  "servers/ortec/test/test_mcsServer.py": true
+}
