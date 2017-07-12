@@ -30,7 +30,7 @@ class InvalidChannelError(Error):
 
 class BNCBaseServer(DeviceServer):
     name = 'Base BNC Server'
-    ID = 67543
+    ID = 67543    
     
     def selectedChannel(self, ctx):
         #returns channel selected in current context
@@ -55,7 +55,6 @@ class BNCBaseServer(DeviceServer):
             
         #signal stop
         self.pulserStopped(device.name)
-        yield
         
     ##### SIGNALS #####
     pulserStarted = Signal(98765, 'signal: pulser started', 's')
@@ -65,27 +64,28 @@ class BNCBaseServer(DeviceServer):
     @setting(100, 'Start')
     def start(self,c):
         dev = self.selectedDevice(c)
-        yield dev.state(0,True)
         
-#        def run():
-#            state = True
-#            period = yield dev.trigger_period()
-#            
-#            #start device and notify
-#            yield dev.state(0, True)
-#            self.pulserStarted(dev.name)
-#            
-#            #enter loop and initially wait before checking
-#            #this ordering ensures that checks are delayed
-#            #and won't begin before pulses actually start
-#            while state:
-#                time.sleep(period)
-#                state = yield dev.run_state()
-#                
-#            self.pulserStopped(dev.name)
-#        
-#        #this call won't block client
-#        threads.callMultipleInThread([(run, [], {})])
+        
+        
+        def run():
+            state = True
+            period = yield dev.trigger_period()
+            
+            #start device and notify
+            yield dev.state(0, True)
+            self.pulserStarted(dev.name)
+            
+            #enter loop and initially wait before checking
+            #this ordering ensures that checks are delayed
+            #and won't begin before pulses actually start
+            while state:
+                time.sleep(period)
+                state = yield dev.run_state()
+                
+            self.pulserStopped(dev.name)
+        
+        #this call won't block client
+        threads.callMultipleInThread([(run, [], {})])
     
     @setting(102, 'Stop')
     def stop(self, c):
@@ -250,39 +250,31 @@ class BNCBaseServer(DeviceServer):
              returns=['', '*w : List of currently enabled channels'])
     def enable(self, c, channels=None, only=False):
         dev = self.selectedDevice(c)
+        chSet = set(dev.chMap.keys())
         
-#        if channels is not None:
-#            p = dev.packet()
-#            for ch in dev.chMap.keys():
-#                p.state(ch, ch in channels)
-#            
-#            yield p.send()
-#            
-#        p = dev.packet()
-#        for ch in dev.chMap.keys():
-#            p.state(ch, key=ch)
-#        resp = yield p.send()
-#        
-#        onCh = [ch for ch in dev.chMap.keys() if resp[ch]]
-#        returnValue(onCh)
         if channels is not None:
-            for ch in dev.chMap.keys():
-                yield dev.state(ch, ch in channels)
-                
+            enables = set([ch for ch in channels if ch in chSet])
+            disables = chSet - enables if only else set()
+            
+            for ch in enables:
+                yield dev.state(ch, True)
+            for ch in disables:
+                yield dev.state(ch, False)
+            
         onCh = []
-        for ch in dev.chMap.keys():
+        for ch in chSet:
             state = yield dev.state(ch)
             if state:
                 onCh.append(ch)
+        
         returnValue(onCh)
     
     @setting(304, 'Disable',
              channels='*w : List of channels to disable')
     def disable(self, c, channels=None):
         dev = self.selectedDevice(c)
-        chs = set(channels).union(set(dev.chMap.keys()))
+        chList = dev.chMap.keys()
         
-        p = dev.packet()
-        for ch in chs:
-            p.state(ch, False)
-        yield p.send()
+        for c in channels:
+            if c in chList:
+                yield dev.state(c, False)

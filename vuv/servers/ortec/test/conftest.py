@@ -1,4 +1,4 @@
-import pytest, mock
+import pytest
 import tempfile
 from shutil import rmtree
 from os.path import join
@@ -21,7 +21,10 @@ def srv(tmpdir, mocker):
     server.exePath = ''
     
     #by default mock the calls to the MCS exe
-    server.proc = mock.Mock()
-    server._isRunning = mock.Mock(return_value = False)
+    server.proc = mocker.Mock()
+    server._isRunning = mocker.Mock(return_value = False)
+    
+    server.onScanStart = mocker.Mock()
+    server.onScanComplete = mocker.Mock()
     
     return server

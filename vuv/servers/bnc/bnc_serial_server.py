@@ -13,14 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from labrad.util import getNodeName
-from twisted.internet.defer import inlineCallbacks, returnValue
-from base_server import BNCBaseServer
-from bnc555 import BNC555Serial
-from bnc565 import BNC565Serial
-
-DEVICE_MAP = {555 : BNC555Serial, 565 : BNC565Serial}
-
 """
 ### BEGIN NODE INFO
 [info]
@@ -38,6 +30,14 @@ message = 67890123
 timeout = 20
 ### END NODE INFO
 """
+
+from labrad.util import getNodeName
+from twisted.internet.defer import inlineCallbacks, returnValue
+from base_server import BNCBaseServer
+from bnc555 import BNC555Serial
+from bnc565 import BNC565Serial
+
+DEVICE_MAP = {555 : BNC555Serial, 565 : BNC565Serial}
     
 class BNCSerialServer(BNCBaseServer):
     '''
@@ -49,6 +49,15 @@ class BNCSerialServer(BNCBaseServer):
     ID = 54333
     
     nodeDirectory = ['', 'Servers', 'BNC Serial', getNodeName(), 'Links']
+    
+    @inlineCallbacks
+    def initServer(self):
+        BNCBaseServer.__init__()
+        
+        reg = self.client.registry()
+        yield reg.cd(self.nodeDirectory, True)
+        yield reg.addListener(self.findDevices)
+        yield reg.notify_on_change(self.ID, True)
     
     def serverConnected(self, ID, name):
         if 'serial' in name.lower():

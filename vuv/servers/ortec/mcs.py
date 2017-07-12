@@ -78,7 +78,7 @@ class MCSRunningError(Error):
 
 class MCSServer(LabradServer):
     
-    name = 'OrtecMCS Server'
+    name = 'Ortec MCS Server'
     ID = 654321
     
     regPath = ['', 'Servers', 'OrtecMCS', getNodeName()]    
@@ -129,8 +129,7 @@ class MCSServer(LabradServer):
         #write job file
         output = ['SET_MCS 1'] + lines
         with open(self.jobPath, 'w') as job:
-            job.writelines('\n'.join(output))
-            print '\n'.join(output)
+            job.write('\n'.join(output))
             
         #execute MCS program with job file
         args = [self.exePath, '-J', self.jobPath]
@@ -146,7 +145,8 @@ class MCSServer(LabradServer):
         def run():
             while self.proc.poll() is None:
                 sleep(0.5)
-            self.onScanComplete(self._savePath())
+            path = self._savePath()
+            self.onScanComplete(path)
                 
         cmds = [(run, [], {})]
         callMultipleInThread(cmds)
@@ -336,11 +336,16 @@ class MCSServer(LabradServer):
         if self._isRunning():
             raise MCSRunningError()
             
-        sp = self._savePath() if path is None else path
+#        sp = path if path is not None else self._savePath()
+#        lines = list(chain(jobs.parameterLines(self.params),
+#                           jobs.SCAN_LINES, [jobs.saveLine(sp)]))
         lines = list(chain(jobs.parameterLines(self.params),
-                           jobs.SCAN_LINES, [jobs.saveLine(sp)]))
+                           jobs.SCAN_LINES))
+        if path is not None:
+             lines.append(jobs.saveLine(path))
+             
         self._runJob(lines)
-        self.onScanStart(self._savePath())
+        self.onScanStart(path)
         self._monitorScan()
     
     @setting(201, 'Stop')
@@ -371,10 +376,9 @@ class MCSServer(LabradServer):
         
         if self._isRunning():
             raise MCSRunningError()
-        sp = self._savePath() if path is None else path
+        sp = path if path is not None else self._savePath()
         lines = ['SET_MCS 1', jobs.saveLine(sp)]
         self._runJob(lines)
-        return sp
         
 __server__ = MCSServer()
 

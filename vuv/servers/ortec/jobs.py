@@ -52,7 +52,7 @@ def boolLine(tag, value):
 def dwellSetting(dwell):
     isInt, val = dwell
     if isInt:
-        tp = ('SET_DWELL_TIME', 's')
+        tp = ('SET_DWELL', 's')
     else:
         #need to include set to external dwell command
         #before setting threshold

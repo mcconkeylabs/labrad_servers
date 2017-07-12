@@ -3,14 +3,17 @@ from labrad import util
 from vuv.servers.ortec import mcs, jobs
 
 MP = 'vuv.servers.ortec.mcs.Popen'
+
    
-def test_start_with_running_process_throws(srv):
+def test_start_with_running_process_throws(srv, mocker):
+    mocker.patch.object(srv,'onScanStart')
     srv._isRunning.return_value = True
     with pytest.raises(mcs.MCSRunningError):
         srv.start(None)
         
 def test_start_calls_process(srv, mocker):
     m = mocker.patch(MP)
+    mocker.patch.object(srv,'onScanStart')
     srv.start(None)
     assert m.called
     
@@ -44,3 +47,7 @@ def test_save_data_while_running_throws(srv):
     with pytest.raises(mcs.MCSRunningError):
         srv.save_data(None, 'test')
         
+def test_start_sends_start_signal(srv):
+    srv.start(None)
+    srv.onScanStart.assert_called_once()
+    

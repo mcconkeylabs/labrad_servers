@@ -30,7 +30,7 @@ class InvalidPositionError(Error):
     code = 1010
 
 class StepperServer(LabradServer):
-    name = 'VUV Stepper'
+    name = 'VUV Stepper Server'
     ID = 57544
     
     pulserStartID = 112233
@@ -38,7 +38,7 @@ class StepperServer(LabradServer):
     
     @inlineCallbacks
     def initServer(self):
-        yield self._loadRegistryData()
+        yield self._loadRegistry()
         
         #add listener to track pulser movement
         yield self.pulser.signal_pulser_started(self.pulserStartID)
@@ -66,7 +66,7 @@ class StepperServer(LabradServer):
         resp = yield p.send()
         
         srv, dev = resp['Pulser']
-        self.pulser = self.client[srv]
+        self.pulser = srv
         yield self.pulser.select_device(dev)
         
         self.posn = resp['Position']
@@ -259,9 +259,3 @@ class StepperServer(LabradServer):
         which do not exclusively belong to the stepper motor before activation
         and then enables them after move.'''
         yield self.pulser.start()
-        
-__server__ = StepperServer()
-
-if __name__ == '__main__':
-    from labrad import util
-    util.runServer(__server__)
