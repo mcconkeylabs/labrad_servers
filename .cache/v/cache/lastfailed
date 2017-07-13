@@ -1,0 +1,4 @@
+{
+  "vuv/servers/ortec/test/test_mcsServer.py": true, 
+  "vuv/servers/scanner/test/test_scanner.py": true
+}
