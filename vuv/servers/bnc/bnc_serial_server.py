@@ -52,12 +52,16 @@ class BNCSerialServer(BNCBaseServer):
     
     @inlineCallbacks
     def initServer(self):
-        BNCBaseServer.__init__()
-        
+        #read in registry data and then call parent constructor
         reg = self.client.registry()
         yield reg.cd(self.nodeDirectory, True)
-        yield reg.addListener(self.findDevices)
+        self.rctx = reg.context()
+        reg.addListener(self.refreshDeviceList, context=self.rctx)
         yield reg.notify_on_change(self.ID, True)
+        
+        super(BNCSerialServer, self).initServer()
+        print "Past constructor"
+        print dir(self)
     
     def serverConnected(self, ID, name):
         if 'serial' in name.lower():
