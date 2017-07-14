@@ -1,7 +1,7 @@
 """
 ### BEGIN NODE INFO
 [info]
-name = Spectrum Scanner
+name = Spectrum Server
 version = 1.0
 description = VUV Spectrum Scan Server
 instancename = %LABRADNODE% Spectrum Scanner
@@ -20,6 +20,6 @@ from labrad.server import LabradServer, setting, Signal
 from base import BaseScanner
 
 class SpectrumScanner(BaseScanner):
-    name = 'Spectrum Scanner'
+    name = 'Spectrum Server'
     
     

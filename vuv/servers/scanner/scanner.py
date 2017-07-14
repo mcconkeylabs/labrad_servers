@@ -1,3 +1,21 @@
+"""
+### BEGIN NODE INFO
+[info]
+name = Scan Server
+version = 1.0
+description = Generic BNC Pulser serial server
+instancename = %LABRADNODE% BNC Serial Server
+
+[startup]
+cmdline = %PYTHON% %FILE%
+timeout = 20
+
+[shutdown]
+message = 67890123
+timeout = 20
+### END NODE INFO
+"""
+
 import labrad.units as U
 from labrad.server import LabradServer, Signal, setting
 from labrad.errors import Error
@@ -6,6 +24,7 @@ from itertools import chain
 
 from vuv.servers.stepper.calc import isValidCh
 from vuv.servers.stepper.stepper import InvalidPositionError
+from base import BaseScanner
 
 ADV_PER_CH = 8.0
 MIN_RATIO = 1 / ADV_PER_CH
@@ -25,7 +44,7 @@ def rat2dcyc(ratio):
     doff = inc - 1
     return (1, doff)
     
-class ScanServer(LabradServer):
+class ScanServer(BaseScanner):
     name = 'Scan Server'
     ID = 67545
     
@@ -74,16 +93,6 @@ class ScanServer(LabradServer):
         for k in ScanServer._paramMap.iterkeys():
             p.set(k, getattr(self, k))
         yield p.send()
-        
-    
-    
-    @setting(200, 'Start')
-    def start(self, c):
-        pass
-    
-    @setting(201, 'Stop')
-    def stop(self, c):
-        pass
     
     @setting(300, 'Dwell Time', dwell='v[s]', returns='v[s]')
     def dwell_time(self, c, dwell=None):
@@ -121,24 +130,6 @@ class ScanServer(LabradServer):
             ratio -= (ratio % MIN_RATIO)
             self.ratio = ratio
         return self.ratio
-        
-    
-    @setting(302, 'Passes', passes='w', returns='w')
-    def passes(self, c, passes=None):
-        '''
-        Set/query number of scan passes.
-        
-        Input:
-            passes - Number of sweeps to make over the scan range
-        Returns
-            Number of passes
-        '''
-        
-        if passes is not None:
-            if passes < 1:
-                raise Error('Invalid pass number')
-            self.passes = passes
-        return self.passes
         
     
     @setting(303, 'Scan Range', start=['w','(ww)'], stop=['w', '(ww)'],
