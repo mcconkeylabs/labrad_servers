@@ -60,8 +60,6 @@ class BNCSerialServer(BNCBaseServer):
         yield reg.notify_on_change(self.ID, True)
         
         super(BNCSerialServer, self).initServer()
-        print "Past constructor"
-        print dir(self)
     
     def serverConnected(self, ID, name):
         if 'serial' in name.lower():
