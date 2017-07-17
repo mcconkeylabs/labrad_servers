@@ -1,15 +1,26 @@
 import os, os.path
+
+from twisted.internet.defer import inlineCallbacks, returnValue
 from labrad.server import LabradServer, setting, Signal
 from labrad.errors import Error
 import labrad.units as U
-from vuv.servers.ortec import jobs
+from vuv.servers.ortec import jobs, mcsSettings
+from vuv.util.files import FileGenerator
 
 
 PASS_MAX = jobs.PASS_MAX
 DWELL_MIN, DWELL_MAX = U.Value(200e-9, 's'), U.Value(5000, 's') 
+BIN_MIN, BIN_MAX = mcsSettings.HARDWARE_BOUNDS['PassLen']
 
 class BaseScanner(LabradServer):
      
+     @inlineCallbacks
+     def initServer(self):
+          super(BaseScanner, self).initServer()
+          
+          yield self._load_registry()
+          self.fgen = FileGenerator()
+          
      def init_scan(self):
           '''Implement in subclass. Initialization code
           which is run at the beginning of the scan.'''
@@ -21,6 +32,22 @@ class BaseScanner(LabradServer):
      def end_scan(self):
           '''Implement in subclass. Clean-up code to be run at the end of the
           scan.'''
+          
+     @inlineCallbacks
+     def _load_registry(self):
+          reg = self.client.registry
+          pass
+          p = reg.packet()
+          pass
+          resp = yield p.send()
+          pulserName, devName = resp['pulser']
+          mcsName = resp['mcs']
+          
+          self.pulser = self.client[pulserName]
+          yield self.pulser.select_device(devName)
+          
+          self.mcs = self.client[mcsName]
+          self.valut = self.client.data_vault
 
      @setting(100, 'Start')
      def start(self, ctx):
@@ -66,6 +93,23 @@ class BaseScanner(LabradServer):
                             .format(DWELL_MIN, DWELL_MAX))
                 
         return self.dwell
+   
+     @setting(112, 'MCS Bins', bins='w', returns='w')
+     def mcs_bins(self, ctx, bins=None):
+          '''
+          Set/query the directory where raw data is saved.
+        
+          Input:
+               path - Directory path to save files to
+          Returns:
+               path - Current save path
+          '''
+          if bins is not None:
+               if bins < BIN_MIN or bins > BIN_MAX:
+                    raise Error('Invalid number of bins')
+               else:
+                    self.bins = bins
+          return bins
         
      @setting(200, 'Save Directory', path='s', returns='s')
      def save_directory(self, ctx, path=None):
@@ -78,19 +122,8 @@ class BaseScanner(LabradServer):
             path - Current save path
         '''
         if path is not None:
-            #if the directory doesn't already exist, try to create it
-            if os.path.isdir(path):
-                if not os.access(path, os.W_OK):
-                    raise Error('Cannot write to directory ' + path)
-            else:
-                try:
-                    os.mkdir(path)
-                except Exception as e:
-                    raise Error('Cannot create directory ' + path)
-                    
-            self.path = path
-            
-        return self.path
+             self.fgen.directory = path
+        return self.fgen.directory
         
      @setting(201, 'Save File Pattern', pattern='s', returns='s')
      def save_file_pattern(self, ctx, pattern=None):
@@ -108,10 +141,9 @@ class BaseScanner(LabradServer):
         Returns:
             path - Current save pattern
         '''
-        pass
-   
-     def _gen_file_path(self):
-          pass
+        if pattern is not None:
+             self.fgen.pattern = pattern
+        return self.fgen.pattern
      
      
      

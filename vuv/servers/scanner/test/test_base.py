@@ -50,30 +50,15 @@ class TestScannerSettings(object):
           
           assert ret == n
           assert srv.npass == n
-          
-class TestSaveFileGeneration(object):
-     @pytest.mark.parametrize('path', ['X:\\'])
-     def test_invalid_directory_path_raises(self, srv, path):
-          with pytest.raises(Error):
-               srv.save_directory(None, path)
                
-     @pytest.mark.skip(reason='Cannot change directory permissions for some reason')
-     def test_directory_with_no_write_access_raises(self, srv, temp_dir):
-          os.chmod(temp_dir, stat.S_IREAD)
-          
+     @pytest.mark.parametrize('bins', [1, 0, -20, 65537])
+     def test_invalid_bins_raises(self, srv, bins):
           with pytest.raises(Error):
-               srv.save_directory(None, temp_dir)
+               srv.mcs_bins(None, bins)
                
-     @pytest.mark.skip(reason='Cannot change directory permissions for some reason')
-     def test_creating_directory_failing_raises(self, srv, temp_dir):
-          os.chmod(temp_dir, stat.S_IREAD)
-          print stat.S_IMODE(os.stat(temp_dir).st_mode) & stat.S_IWRITE
+     @pytest.mark.parametrize('bins', [4, 50, 65536])
+     def test_valid_bins_sets(self, srv, bins):
+          ret = srv.mcs_bins(None, bins)
           
-          subpath = os.path.join(temp_dir, 'child')
-          
-          with pytest.raises(Error):
-               srv.save_directory(None, subpath)
-               
-     
-          
-     
+          assert ret == bins
+          assert srv.bins == bins
