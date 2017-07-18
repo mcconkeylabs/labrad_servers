@@ -28,7 +28,7 @@ class BaseScanner(LabradServer):
           yield self._load_registry()
           self.fgen = FileGenerator()
           
-          yield LabradServer.initServer()
+          yield LabradServer.initServer(self)
           
      def init_scan(self):
           '''Implement in subclass. Initialization code
