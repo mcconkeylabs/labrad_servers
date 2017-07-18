@@ -95,6 +95,8 @@ class MCSServer(LabradServer):
         self.tmpDir = T.mkdtemp()
         self.jobPath = OP.join(self.tmpDir, JOB_NAME)
         
+        yield LabradServer.initServer()
+        
     @inlineCallbacks
     def stopServer(self):
         yield self._updateRegistry()

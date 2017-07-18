@@ -4,12 +4,12 @@ CH_FRAC = 8
 
 @total_ordering
 class StepperPosition(object):
-     def __init__(self, channel=0, fraction=0):
+     def __init__(self, channel=0, fraction=0, forward=True):
           self._ch = 0
           self._frac = 0
           
-          self.channel = channel
-          self.fraction = fraction
+          self.set_posn(channel, fraction)
+          self.direction = forward
           
      @property
      def channel(self):
@@ -29,6 +29,9 @@ class StepperPosition(object):
           self._ch += pf / CH_FRAC
           self._frac = pf % CH_FRAC
           
+     def set_posn(self, channel, frac):
+          self.channel = channel
+          self.frac = frac
           
      def __eq__(self, other):
           return (self._ch == other._ch) and (self._frac == other._frac)

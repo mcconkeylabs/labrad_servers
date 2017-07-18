@@ -59,7 +59,7 @@ class BNCSerialServer(BNCBaseServer):
         reg.addListener(self.refreshDeviceList, context=self.rctx)
         yield reg.notify_on_change(self.ID, True)
         
-        super(BNCSerialServer, self).initServer()
+        yield BNCBaseServer.initServer()
     
     def serverConnected(self, ID, name):
         if 'serial' in name.lower():
