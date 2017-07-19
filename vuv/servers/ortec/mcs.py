@@ -94,7 +94,7 @@ class MCSServer(LabradServer):
 #        
 #        self.tmpDir = T.mkdtemp()
 #        self.jobPath = OP.join(self.tmpDir, JOB_NAME)
-        
+        self._killed = False
         yield LabradServer.initServer(self)
         
     @inlineCallbacks
@@ -329,14 +329,18 @@ class MCSServer(LabradServer):
     
     @setting(200, 'Start', path='s: Save path')
     def start(self, c, path=None):
-        '''Start the MCS with the current settings.
+        '''Start the MCS with the current settings. Will raise an error
+        if the MCS is killed, will raise an error if started.
+        
         path: File name or directory to place .mcs spectrum file.
               Defaults to None in which case currently set directory is used.
               If directory provided, saves file with format
               YY_MM_DD_NN.mcs    where NN increments with successive saves
         '''
         if self._isRunning():
-            raise MCSRunningError()
+            return
+        elif self._killed:
+            raise Error('MCS killed. Cannot start.')
             
 #        sp = path if path is not None else self._savePath()
 #        lines = list(chain(jobs.parameterLines(self.params),
@@ -350,13 +354,31 @@ class MCSServer(LabradServer):
         self.onScanStart(path)
         self._monitorScan()
     
-    @setting(201, 'Stop')
-    def stop(self, c):
-        '''Stop the current run.'''
+    @setting(201, 'Stop', kill='b')
+    def stop(self, c, kill=None):
+        '''Stop the current run.
+        kill - True if MCS should also be killed
+        '''
         if self._isRunning():
             self.proc.terminate()
+        if kill:
+             self._killed
+            
+    @setting(201, 'Kill', kill='b', returns='b')
+    def kill(self, c, kill=None):
+        '''
+        Kill the MCS or query kill state. If killed, MCS
+        will raise an error if started.
+        '''
+        if kill:
+             yield self.stop(c)
+             self._killed = True
+        elif kill is False:
+             self._killed = False
+             
+        returnValue(self._killed)
     
-    @setting(202, 'Clear')
+    @setting(212, 'Clear')
     def clear_buffer(self, c):
         '''Clear all data in the hardware buffers. 
         Will not clear if the device is running.'''
@@ -364,14 +386,14 @@ class MCSServer(LabradServer):
             raise MCSRunningError()
         self._runJob(jobs.CLEAR_LINES)
         
-    @setting(203, 'Run State', returns='b')
+    @setting(213, 'Run State', returns='b')
     def run_state(self, c):
         '''Current MCS run state.'''
         return self._isRunning()
         
     #THIS IS NO GOOD. NEED TO SAVE LOCATION TO PASS ON
     #DOES NOT PROCESS BINARY FILE!!!
-    @setting(204, 'Save Data', path='s', returns='s')
+    @setting(214, 'Save Data', path='s', returns='s')
     def save_data(self, c, path=None):
         '''Save current MCS buffer to specified path. Writes to default
         otherwise.'''

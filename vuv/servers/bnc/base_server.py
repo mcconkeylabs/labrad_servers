@@ -32,6 +32,10 @@ class BNCBaseServer(DeviceServer):
     name = 'Base BNC Server'
     ID = 67543    
     
+    def initServer(self):
+        self._killed = False
+        DeviceServer.initServer(self)
+    
     def selectedChannel(self, ctx):
         #returns channel selected in current context
         try:
@@ -63,9 +67,11 @@ class BNCBaseServer(DeviceServer):
     ##### SETTINGS #####
     @setting(100, 'Start')
     def start(self,c):
+        #if pulser is killed, can't start
+        if self._killed:
+             raise Error('Pulser is killed. Cannot start.')
+             
         dev = self.selectedDevice(c)
-        
-        
         
         def run():
             state = True
@@ -87,17 +93,38 @@ class BNCBaseServer(DeviceServer):
         #this call won't block client
         threads.callMultipleInThread([(run, [], {})])
     
-    @setting(102, 'Stop')
-    def stop(self, c):
+    @setting(102, 'Stop', kill='b')
+    def stop(self, c, kill=None):
         yield self.selectedDevice(c).state(0, False)
+        if kill:
+             self._killed = True
         
-    @setting(103, 'Channel List',
+    @setting(103, 'Kill', kill='b', returns='b')
+    def kill(self, c, kill=None):
+        '''
+        Kill pulser or query kill state. If killed, the pulser
+        will not permit a start to be triggered until the kill
+        state is removed.
+        
+        kill - Set kill state True or False. None queries.
+        
+        returns - Present kill state
+        '''
+        if kill:
+             yield self.selectedDevice(c).state(0, False)
+             self._killed = True
+        elif kill is False:
+             self._killed = False
+             
+        returnValue(self._killed)
+        
+    @setting(113, 'Channel List',
              returns = '*(ws) : List of channel numbers and names')
     def channel_list(self, c):
         chList = yield self.selectedDevice(c).channel_list()
         returnValue(chList)
         
-    @setting(104, 'Select Channel',
+    @setting(114, 'Select Channel',
              channel = [': Get current selection',
                         'w : Select channel by number'],
              returns = ['', 'w : Selected channel number'])
@@ -115,7 +142,7 @@ class BNCBaseServer(DeviceServer):
         c['Channel'] = channel
         return c['Channel']
                 
-    @setting(105, 'List Modes',
+    @setting(115, 'List Modes',
              channel = [': List for currently selected channel',
                         'w : List for channel number'],
              returns = '*s : List of supported modes')
@@ -124,16 +151,16 @@ class BNCBaseServer(DeviceServer):
         ch = channel if channel is not None else self.selectedChannel(c)
         returnValue(dev.channel_modes(ch))
         
-    @setting(106, 'Write Line', line = 's')
+    @setting(116, 'Write Line', line = 's')
     def write_line(self, c, line):
         self.selectedDevice(c).write(line)
         
-    @setting(107, 'Read Line', returns='s')
+    @setting(117, 'Read Line', returns='s')
     def read_line(self, c):
         ret = yield self.selectedDevice(c).read()
         returnValue(ret)
         
-    @setting(108, 'Query', command = 's', returns='s')
+    @setting(118, 'Query', command = 's', returns='s')
     def query(self, c, command):
         ret = yield self.selectedDevice(c).readWrite(command)
         returnValue(ret)
@@ -144,6 +171,11 @@ class BNCBaseServer(DeviceServer):
              returns = ['', 'b : Selected channel state.'])
     def state(self, c, state=None):
         (dev, ch) = self._sdc(c)
+        
+        #prevents workaround to enable pulser if killed
+        if self._killed and state is True:
+             raise Error('Pulser killed. Cannot enable trigger.')
+             
         ret = yield dev.state(ch, state)
         returnValue(ret)
         
