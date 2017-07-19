@@ -45,7 +45,7 @@ class BNCSerialServer(BNCBaseServer):
     Does not include device-specific features (ie. 35V out, multiplexing).
     '''
     
-    name = 'BNC Serial Server'
+    name = '%LABRADNODE% BNC Serial Server'
     ID = 54333
     
     nodeDirectory = ['', 'Servers', 'BNC Serial', getNodeName(), 'Links']

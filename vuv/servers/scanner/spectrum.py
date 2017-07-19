@@ -20,7 +20,7 @@ from labrad.server import setting, Signal
 from base import BaseScanner
 
 class SpectrumScanner(BaseScanner):
-     name = 'Spectrum Server'
+     name = '%LABRADNODE% Spectrum Scanner'
     
      def init_scan(self):
           pass

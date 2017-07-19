@@ -27,6 +27,8 @@ from vuv.servers.ortec.mcsSettings import HARDWARE_BOUNDS
 V_MIN, V_MAX = map(lambda x: U.Value(x, 'V'), HARDWARE_BOUNDS['Ramp'])
 
 class EnergyScanner(BaseScanner):
+    
+    name = '%LABRADNODE% Energy Scanner'
      
      def init_scan(self):
           pass

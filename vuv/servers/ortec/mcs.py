@@ -13,22 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import tempfile as T
-import labrad.units as U
-import datetime as D
-import os, re, time
-import os.path as OP
-from itertools import chain
-from shutil import rmtree
-from subprocess import call, Popen
-from time import sleep
-from labrad.server import LabradServer, setting, Signal
-from labrad.errors import Error
-from labrad.util import getNodeName
-from twisted.internet.defer import returnValue, inlineCallbacks
-from twisted.internet.threads import callMultipleInThread
-import jobs
-
 """
 ### BEGIN NODE INFO
 [info]
@@ -48,6 +32,22 @@ timeout = 20
     
 Class for Ortec MCS-PCI Multi-channel scaler card
 """
+
+import tempfile as T
+import labrad.units as U
+import datetime as D
+import os, re, time
+import os.path as OP
+from itertools import chain
+from shutil import rmtree
+from subprocess import call, Popen
+from time import sleep
+from labrad.server import LabradServer, setting, Signal
+from labrad.errors import Error
+from labrad.util import getNodeName
+from twisted.internet.defer import returnValue, inlineCallbacks
+from twisted.internet.threads import callMultipleInThread
+import jobs
 
 DATE_FMT = '%Y_%m_%d'                    
 SPEC_REGEX = re.compile('\d{4}_\d{2}_\d{2}_(\d{2})\.mcs')
@@ -78,7 +78,7 @@ class MCSRunningError(Error):
 
 class MCSServer(LabradServer):
     
-    name = 'Ortec MCS Server'
+    name = '%LABRADNODE% OrtecMCS Server'
     ID = 654321
     
     regPath = ['', 'Servers', 'OrtecMCS', getNodeName()]    
@@ -89,11 +89,11 @@ class MCSServer(LabradServer):
     
     @inlineCallbacks
     def initServer(self):
-        self.reg = self.client.registry
-        yield self._loadRegistry()
-        
-        self.tmpDir = T.mkdtemp()
-        self.jobPath = OP.join(self.tmpDir, JOB_NAME)
+#        self.reg = self.client.registry
+#        yield self._loadRegistry()
+#        
+#        self.tmpDir = T.mkdtemp()
+#        self.jobPath = OP.join(self.tmpDir, JOB_NAME)
         
         yield LabradServer.initServer(self)
         
