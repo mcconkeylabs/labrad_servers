@@ -25,12 +25,17 @@ SLEEP_TIME = 0.25
 
 class BaseScanner(LabradServer):
      
+     hardwareStarted = Signal(415263, 'signal: hardware started', '_')
+     hardwareStopped = Signal(415264, 'signal: hardware stopped', '_')
+     
      @inlineCallbacks
      def initServer(self):          
           yield self._load_registry()
           self.fgen = FileGenerator()
           
           yield LabradServer.initServer(self)
+          
+          callMultipleInThread([(self._monitor_hardware_status, (), {})])
           
      def init_scan(self):
           '''Implement in subclass. Initialization code
@@ -191,39 +196,60 @@ class BaseScanner(LabradServer):
           
           if steps is int:
                dx = StepperPosition(0, steps)
-               newPos = self.posn + dx
+               newPosn = self.posn + dx
           else:
-               newPos = StepperPosition().set_posn(*steps)
+               newPosn = StepperPosition().set_posn(*steps)
           
-          if newPos.toinc() < 0:
+          if newPosn.toinc() < 0:
                outStr = 'Invalid position ({0}, {1}) on stepper'\
-                         .format(newPos.channel, newPos.fraction)
+                         .format(newPosn.channel, newPosn.fraction)
                raise Error(outStr)
           
           is_fwd = steps >= 0
           N = abs(steps)
           
-          @inlineCallbacks
-          def run_pulser():
-               enabled = yield self.pulser.enable()
-               ons = map(lambda x: self.ch_map[x], ['STEP_DIR, STEP_ADV'])
-               yield self.pulser.enable(ons, True)
-               
-               yield self._step_adv_setup()
-               yield self._step_dir_setup(is_fwd)
-               
-               yield self._trigger_setup(MOVE_DWELL, N)
-               
-               #need to start pulser and run monitor in loop or get
-               #signal from pulser
-               yield self.pulser.start()
-               
-               while (yield self.pulser.run_state()):
-                    sleep(SLEEP_TIME)
+          enabled = yield self.pulser.enable()
+          ons = map(lambda x: self.ch_map[x], ['STEP_DIR, STEP_ADV'])
           
-               yield self.pulser.enable(enabled, True)
+          def update():
+               self.posn = newPosn
+          
+          stepList = [(self.pulser.enable, (ons, True), {}),
+                      (self._step_adv_setup, (), {}),
+                      (self._step_dir_setup, (is_fwd), {}),
+                      (self._trigger_setup, (MOVE_DWELL, N), {}),
+                      (self._pstart_wait, (), {}),
+                      (self.pulser.enable, (enabled, True), {}),
+                      (update, (), {}),
+                      ]
+          
+          
+          
+#          @inlineCallbacks
+#          def run_pulser():
+#               enabled = yield self.pulser.enable()
+#               ons = map(lambda x: self.ch_map[x], ['STEP_DIR, STEP_ADV'])
+#               yield self.pulser.enable(ons, True)
+#               
+#               yield self._step_adv_setup()
+#               yield self._step_dir_setup(is_fwd)
+#               
+#               yield self._trigger_setup(MOVE_DWELL, N)
+#               
+#               yield self._pstart_wait()
+#          
+#               yield self.pulser.enable(enabled, True)
+#               self.posn = newPosn
                
-          callMultipleInThread([run_pulser, [], {}])
+          callMultipleInThread(stepList)
+          
+     
+     @inlineCallbacks
+     def _ch_setup(self, dcyc, forward):
+          yield self._mcs_start_setup()
+          yield self._mcs_adv_setup(*dcyc)
+          yield self._step_adv_setup()
+          yield self._step_dir_setup(forward)
           
      @inlineCallbacks
      def _mcs_start_setup(self):
@@ -239,6 +265,7 @@ class BaseScanner(LabradServer):
           
           yield p.send()
      
+     @inlineCallbacks
      def _mcs_adv_setup(self, on, off):
           p = self.pulser.packet()
           
@@ -252,6 +279,7 @@ class BaseScanner(LabradServer):
           
           yield p.send()
           
+     @inlineCallbacks     
      def _step_adv_setup(self):
           p = self.pulser.packet()
           
@@ -265,6 +293,7 @@ class BaseScanner(LabradServer):
           
           yield p.send()
           
+     @inlineCallbacks     
      def _step_dir_setup(self, forward=True):
           p = self.pulser.packet()
           
@@ -277,7 +306,8 @@ class BaseScanner(LabradServer):
           p.output(False)
           
           yield p.send()       
-          
+     
+     @inlineCallbacks     
      def _trigger_setup(self, dwell, pulses):
           p = self.pulser.packet()
           
@@ -286,7 +316,8 @@ class BaseScanner(LabradServer):
           p.mode('Burst', pulses)
           
           yield p.send()
-          
+        
+     @inlineCallbacks
      def _mcs_setup(self):
           p = self.mcs.packet()
           
@@ -304,3 +335,26 @@ class BaseScanner(LabradServer):
           pass
           
           yield p.send()
+          
+     @inlineCallbacks
+     def _pstart_wait(self):
+          yield self.pulser.start()
+          yield self.pulser.select_channel(0)
+          
+          state = yield self.pulser.state()
+          while state:
+               sleep(0.5)
+               
+     @inlineCallbacks
+     def _monitor_hardware_status(self):
+          state = yield self.pulser.run_state()
+          
+          while True:
+               sleep(0.5)
+               newState = yield self.pulser.run_state()
+               if state != newState:
+                    if newState:
+                         self.hardwareStarted()
+                    else:
+                         self.hardwareStopped()
+                    state = newState
