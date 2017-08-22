@@ -1,6 +1,8 @@
 import os, os.path
+import itertools as I
 from time import sleep
 
+from twisted.interneternet.threads import callMultipleInThread
 from twisted.internet.defer import inlineCallbacks, returnValue
 from labrad.server import LabradServer, setting, Signal
 from labrad.errors import Error
@@ -63,11 +65,21 @@ class BaseScanner(LabradServer):
 
      @setting(100, 'Start')
      def start(self, ctx):
-          pass
+          #make sure devices aren't killed
+          yield self.pulser.kill(False)
+          yield self.mcs.kill(False)
+          
+          fn_list = I.chain([self.init_scan],
+                            I.repeat(self.scan_pass, self.passes),
+                            [self.end_scan])
+          call_list = map(lambda x: (x, [], {}), fn_list)
+          callMultipleInThread(call_list)
     
      @setting(101, 'Stop')
      def stop(self, ctx):
-          pass
+          #stop and kill
+          yield self.pulser.stop(True)
+          yield self.mcs.stop(True)
     
      @setting(110, 'Passes', passes='w', returns='w')
      def passes(self, ctx, passes=None):
@@ -210,6 +222,8 @@ class BaseScanner(LabradServer):
                     sleep(SLEEP_TIME)
           
                yield self.pulser.enable(enabled, True)
+               
+          callMultipleInThread([run_pulser, [], {}])
           
      @inlineCallbacks
      def _mcs_start_setup(self):
