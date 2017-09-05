@@ -7,6 +7,7 @@ from labrad.util import runServer
 MANAGER_FOLDER = r'C:\LabRAD\scalabrad-0.6.3\bin'
 MANAGER_SCRIPT = 'labrad.bat'
 
+
 MGR_SCRIPT = r'C:\local_labrad\scalabrad-0.8.3\bin\labrad.bat'
 WEB_SCRIPT = r'C:\local_labrad\scalabrad-web-server-2.0.4\bin\labrad-web.bat'
 
@@ -40,6 +41,12 @@ class ProcessWrapper(object):
             if self.proc.returncode is None:
                 S.call(['taskkill', '/F', '/T',
                         '/PID', str(self.proc.pid)])
+    def running(self):
+        '''Returns true if process is running and initialization is complete.
+        Override in subclass based on process conditions.
+        '''
+        pass
+        
                         
     def _set_env(self, env=None):
         self.env = env if env is not None else labrad_environ()
@@ -84,4 +91,6 @@ if __name__ == '__main__':
         
     while True:
         for p in procs:
-            print p.proc.stdout.read()
+            line = p.proc.stdout.read()
+            if line != '':
+                 print line 
