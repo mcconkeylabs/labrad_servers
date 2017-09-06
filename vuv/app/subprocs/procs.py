@@ -2,6 +2,7 @@ import subprocess as S
 import os, os.path, sys
 from time import sleep
 from threading import Thread
+from PyQt5.QtCore import QObject, pyqtSignal
 from labrad.util import runServer
     
 MANAGER_FOLDER = r'C:\LabRAD\scalabrad-0.6.3\bin'
@@ -19,8 +20,10 @@ def labrad_environ():
         os.environ[k] = v
     return os.environ
     
-class ProcessWrapper(object):
-    def __init__(self, args, env=None):
+class ProcessWrapper(QObject):
+    outputAvailable = pyqtSignal('QString') 
+     
+    def __init__(self, args = (), env = None):
         self.args = args
         self._set_env(env)
     
@@ -35,6 +38,9 @@ class ProcessWrapper(object):
                             stdout = S.PIPE,
                             stderr = S.STDOUT)
         
+        self.poller = Thread(target = self._poll_proc)
+        self.poller.start()
+        
     def stop(self):
         if hasattr(self, 'proc'):
             self.proc.poll()
@@ -45,8 +51,18 @@ class ProcessWrapper(object):
         '''Returns true if process is running and initialization is complete.
         Override in subclass based on process conditions.
         '''
-        pass
+        return (not hasattr(self, 'proc')) or (self.proc.poll() is not None)
         
+    def _poll_proc(self):
+         while True:
+              ret = self.proc.stdout.readline()
+              
+              #process will always kill when other process dies
+              #and no output, thread always dies
+              if (ret == '') and (self.proc.poll() is not None):
+                   return
+              else:
+                   self.outputAvailable.emit(ret)
                         
     def _set_env(self, env=None):
         self.env = env if env is not None else labrad_environ()
@@ -58,20 +74,20 @@ class NodeWrapper(ProcessWrapper):
         args = self.BASE_ARGS + ['--name', name]
         super(NodeWrapper, self).__init__(args, env)
         
-class ServerWrapper(ProcessWrapper):
-    from twisted.internet import reactor 
-    
-    def __init__(self, serverObject=None, env=None):
-        self.srv = serverObject
-        self._set_env(env)
-        
-    def start(self):
-#        runServer(self.srv, False, False)
-        self.thread = Thread(target=self.reactor.run, args=(False,))
-        self.thread.start()
-    
-    def stop(self):
-        self.reactor.stop()
+#class ServerWrapper(ProcessWrapper):
+#    from twisted.internet import reactor 
+#    
+#    def __init__(self, serverObject=None, env=None):
+#        self.srv = serverObject
+#        self._set_env(env)
+#        
+#    def start(self):
+##        runServer(self.srv, False, False)
+#        self.thread = Thread(target=self.reactor.run, args=(False,))
+#        self.thread.start()
+#    
+#    def stop(self):
+#        self.reactor.stop()
         
 class ProcessManager(object):
     def __init__(self):
