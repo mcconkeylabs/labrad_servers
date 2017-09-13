@@ -9,6 +9,8 @@ SRV_REGEX = re.compile(SRV_MSG_RE_STR)
 MGR_OK_STATUS = 'tlsPolicy=ON'
 WEB_OK_STATUS = 'now serving at'
 
+NODE_MSG_RE_STR = r'(?P<type>\w+):((?P<source>[\w\.]):(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}-\d{4}))? [(?P<args>.*)]\s*(?P<message>.*)'
+
 class LabradExecutable(ProcessWrapper):
      ok_message = None
      exe_path = None
@@ -48,8 +50,7 @@ class LabradNodeProcess(ProcessWrapper):
      def __init__(self, name):
           #add name to call and then split into arg list before super call
           self.node_name = name
-          call = self.NODE_CALL + name
-          args = shlex.split(call)
+          args = shlex.split(self.NODE_CALL + name)
           super(LabradNodeProcess, self).__init__(args=args)
           
           self.cxn = labrad.connect()
