@@ -1,4 +1,5 @@
 import re, shlex
+import labrad
 from procs import ProcessWrapper
 from vuv import definitions as D
 
@@ -43,19 +44,29 @@ class WebServerProcess(LabradExecutable):
      
 class LabradNodeProcess(ProcessWrapper):
      NODE_CALL = 'python -m labrad.node --name='
+     
      def __init__(self, name):
           #add name to call and then split into arg list before super call
+          self.node_name = name
           call = self.NODE_CALL + name
           args = shlex.split(call)
           super(LabradNodeProcess, self).__init__(args=args)
           
-          self.booted = False
-          self.outputAvailable.connect(self._scan_output)
+          self.cxn = labrad.connect()
+          
+          p = self.cxn.registry.packet()
+          p.cd(['Nodes', name])
+          p.get('autostart')
+          resp = p.send()
+          
+          self._start_set = set(resp['get'])
+          
           
      def running(self):
-          if super(LabradNodeProcess, self).running():
-               return self.booted
+          if not super(LabradNodeProcess, self).running():
+               return False
           
-     def _scan_output(self, line):
-          pass
-     
+          servers = set(x for (n, x) in self.cxn.manager.servers())
+          return self._start_set.issubset(servers)
+          
+          
