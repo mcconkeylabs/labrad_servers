@@ -23,7 +23,7 @@ def labrad_environ():
 class ProcessWrapper(QObject):
     outputAvailable = pyqtSignal('QString') 
      
-    def __init__(self, args = (), env = None):
+    def __init__(self, args = [], env = None):
         self.args = args
         self._set_env(env)
     
@@ -88,15 +88,6 @@ class NodeWrapper(ProcessWrapper):
 #    
 #    def stop(self):
 #        self.reactor.stop()
-        
-class ProcessManager(object):
-    def __init__(self):
-        self.procs = []
-    
-    def __del__(self):
-        for p in self.procs:
-            p.stop()
-            
                 
             
 if __name__ == '__main__':
