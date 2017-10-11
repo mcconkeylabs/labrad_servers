@@ -110,6 +110,14 @@ def scanPass(pulser, advs, dwell):
     move(pulser, -(advs+8), moveChsOnly=True)
     move(pulser, 8, moveChsOnly=True)
     
+    #restore pulser channels to preferred settings
+    p = pulser.packet()
+    p.select_channel(CH_MAP['Stepper Advance'])
+    p.mode('Normal')
+    p.select_channel(0)
+    p.mode('Burst', 1000)
+    p.send()
+    
 if __name__ == '__main__':
     cxn = labrad.connect()
     pulser = cxn['BNC Serial Server']
