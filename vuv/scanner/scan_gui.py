@@ -59,7 +59,8 @@ class ScanDialog(QDialog):
                   'chPerBin' : float(self.ui.chPerBin.text),
                   'dwellTime' : float(self.ui.dwellTime.text),
                   'saveFolder' : self.ui.saveFolder.text,
-                  'savePattern' : self.ui.filePattern.text
+                  'savePattern' : self.ui.filePattern.text,
+                  'moveOnly' : False,
                   }
           self.scan = config.ScanConfig._make([data[f] 
                          for f in config.ScanConfig._fields])

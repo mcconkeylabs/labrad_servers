@@ -175,7 +175,7 @@ class MCSServer(LabradServer):
         return self.params['Length']
     
     @setting(101, 'Passes', passes = 'w', returns='w')
-    def sweeps(self, c, passes=None):
+    def passes(self, c, passes=None):
         '''Set/query the number of scan sweeps. (None queries)'''
         if passes is not None:
             if passes < jobs.PASS_MIN or passes > jobs.PASS_MAX:
