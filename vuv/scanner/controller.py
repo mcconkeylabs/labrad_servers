@@ -32,7 +32,7 @@ CH_DEFAULTS_MAP = {'MCS Start' : START,
 
 
 class LabradController(object):
-     reg_path = ['','VUV', 'gui']
+     reg_path = ['','VUV Controller']
      
      def __init__(self, cxn):
           self.cxn = cxn

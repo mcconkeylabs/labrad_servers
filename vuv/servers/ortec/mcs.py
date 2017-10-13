@@ -364,7 +364,7 @@ class MCSServer(LabradServer):
         if kill:
              self._killed
             
-    @setting(201, 'Kill', kill='b', returns='b')
+    @setting(202, 'Kill', kill='b', returns='b')
     def kill(self, c, kill=None):
         '''
         Kill the MCS or query kill state. If killed, MCS

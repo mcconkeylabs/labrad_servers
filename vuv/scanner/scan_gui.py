@@ -1,7 +1,5 @@
-import time
-from PyQt5 import QtGui, QtWidgets
-from QtWidgets import QApplication, QDialog
-from ui_scanwindow import Ui_ScanDialog
+import time, sys
+from PyQt5 import QtGui, uic, QtWidgets
 
 import config
 
@@ -17,7 +15,7 @@ class BinMultValidator(QtGui.QDoubleValidator):
           else:
                return self.Intermediate
 
-class ScanDialog(QDialog):
+class ScanDialog(QtWidgets.QDialog):
      def __init__(self, controller):
           super(ScanDialog, self).__init__()
           
@@ -25,9 +23,11 @@ class ScanDialog(QDialog):
           self.scan = config.DEFAULT_SCAN_CONFIG
           
           #set up designer interface
-          self.ui = Ui_ScanDialog()
+          ui_class, ui_widget = uic.loadUiType('scanwindow.ui')
+          self.ui = ui_class()
           self.ui.setupUi(self)
           self._ui_init()
+          self.show()
           
      def _ui_init(self):
           #start/abort buttons
@@ -94,3 +94,20 @@ class ScanDialog(QDialog):
      
      def abort_click(self, clicked=False):
           self.ctrl.abort()
+          
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    
+    import sys
+    del sys.modules['twisted.internet.reactor']
+    
+    import qt4reactor
+    qt4reactor.install()
+    from twisted.internet import reactor
+    import labrad, labrad.util, labrad.types
+    cxn = labrad.connect()
+    window = ScanDialog(cxn)
+    window.show()
+    
+    reactor.runReturn()
+    sys.exit(app.exec_())
