@@ -13,7 +13,7 @@ CH_MAP = {'MCS Start' : 1,
           'Stepper Advance' : 3,
           'Stepper Direction' : 4}
           
-PULSER_NAME = 'BNC Serial Server'
+PULSER_NAME = 'VUV BNC Serial Server'
           
 def initializePulser(pulser, don, doff):
     p = pulser.packet()
@@ -43,7 +43,7 @@ def initializePulser(pulser, don, doff):
     p.delay(PULSE_DELAY)
     p.mode('Normal')
     p.polarity(True)
-    p.output(False)
+    p.output(True, U.Value(5,'V'))
     
     p.select_channel(CH_MAP['Stepper Direction'])
     p.state(True)
@@ -120,7 +120,7 @@ def scanPass(pulser, advs, dwell):
     
 if __name__ == '__main__':
     cxn = labrad.connect()
-    pulser = cxn['BNC Serial Server']
+    pulser = cxn['VUV BNC Serial Server']
     pulser.select_device(0)
     
     for i in range(2):
