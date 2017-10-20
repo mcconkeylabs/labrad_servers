@@ -3,7 +3,7 @@ import vuv_scan as scan
 import labrad.units as U
 from PyQt4 import QtCore, QtGui, uic
 
-PULSER_SERVER = 'BNC Serial Server'
+PULSER_SERVER = 'VUV BNC Serial Server'
 
 class ScannerWindow(QtGui.QMainWindow):
     def __init__(self, cxn):

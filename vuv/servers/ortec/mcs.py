@@ -78,7 +78,7 @@ class MCSRunningError(Error):
 
 class MCSServer(LabradServer):
     
-    name = 'OrtecMCS Server'
+    name = '%LABRADNODE% OrtecMCS Server'
     ID = 654321
     
     regPath = ['', 'Servers', 'OrtecMCS', getNodeName()]    
