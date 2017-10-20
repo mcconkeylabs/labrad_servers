@@ -36,7 +36,7 @@ class ScanDialog(QtWidgets.QDialog):
           
           #file settings
           self.ui.saveFileLabel.text = ''
-          self.ui.filePatter.text = ''
+          self.ui.filePattern.text = ''
           self.ui.saveFolder.text = ''
           
           self.ui.saveFolderButton.clicked.connect(self.folder_click)
@@ -86,6 +86,7 @@ class ScanDialog(QtWidgets.QDialog):
           folderPath = QtWidgets.QFileDialog.getExistingDirectory(self,
                                                                   'Save Data Directory')
           self.ui.saveFolder.text = folderPath
+          print folderPath
           
      def start_click(self, clicked=False):
           self.read_settings()
@@ -101,8 +102,8 @@ if __name__ == '__main__':
     import sys
     del sys.modules['twisted.internet.reactor']
     
-    import qt4reactor
-    qt4reactor.install()
+    import qt5reactor
+    qt5reactor.install()
     from twisted.internet import reactor
     import labrad, labrad.util, labrad.types
     cxn = labrad.connect()
