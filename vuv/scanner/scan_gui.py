@@ -1,7 +1,10 @@
 import time, sys
+import os.path
 from PyQt5 import QtGui, uic, QtWidgets
 
 import config
+
+FILE_SUFFIX = ".dat"
 
 class BinMultValidator(QtGui.QDoubleValidator):
      def validate(self, lineInput, pos):
@@ -35,18 +38,19 @@ class ScanDialog(QtWidgets.QDialog):
           self.ui.abortButton.clicked.connect(self.abort_click)
           
           #file settings
-          self.ui.saveFileLabel.text = ''
-          self.ui.filePattern.text = ''
-          self.ui.saveFolder.text = ''
+          self.ui.saveFileLabel.setText('')
+          self.ui.filePattern.setText('')
+          self.ui.saveFolder.setText('')
           
           self.ui.saveFolderButton.clicked.connect(self.folder_click)
+          self.ui.filePattern.textChanged.connect(self.refresh_scan_pattern)
           
           #pass settings
           self.ui.channels.setValidator(QtGui.QIntValidator())
           self.ui.passes.setValidator(QtGui.QIntValidator())
           self.ui.chPerBin.setValidator(BinMultValidator())
           self.ui.dwellTime.setValidator(QtGui.QDoubleValidator())
-          self.ui.scanLengthLabel.text = ''
+          self.ui.scanLengthLabel.setText('')
           
           #update scan time hooks
           for name in ['channels', 'passes', 'dwellTime']:
@@ -80,13 +84,23 @@ class ScanDialog(QtWidgets.QDialog):
           
           #build output string from non-zero time values
           time_str = ''.join(['{0}{1}'.format(v,k) for (k, v) in fields if v != 0])
-          self.ui.saveFileLabel.text = time_str
+          self.ui.saveFileLabel.setText(time_str)
           
      def folder_click(self, clicked=False):
           folderPath = QtWidgets.QFileDialog.getExistingDirectory(self,
                                                                   'Save Data Directory')
-          self.ui.saveFolder.text = folderPath
-          print folderPath
+          self.ui.saveFolder.setText(folderPath)
+          self.refresh_scan_pattern()
+          
+     def refresh_scan_pattern(self, text=""):
+         fldr = self.ui.saveFolder.text()
+         pat = self.ui.filePattern.text()
+         
+         file_name = pat + '1.mcs'
+         path = os.path.join(fldr, file_name)
+         
+         self.ui.saveFileLabel.setText(path)
+          
           
      def start_click(self, clicked=False):
           self.read_settings()
