@@ -193,7 +193,7 @@ class LabradController(object):
           
           suffix = '' if pass_num is None else str(pass_num)
           file_name = self.savePattern + suffix + '.mcs'
-          file_path = os.path.join(run.saveFolder, file_name)
+          file_path = os.path.abspath(os.path.join(run.saveFolder, file_name))
           
           p = self.mcs.packet()
           p.passes(1)

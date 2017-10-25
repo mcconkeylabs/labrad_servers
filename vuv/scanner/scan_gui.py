@@ -2,7 +2,7 @@ import time, sys
 import os.path
 from PyQt5 import QtGui, uic, QtWidgets
 
-import config
+import configuration
 
 FILE_SUFFIX = ".dat"
 
@@ -13,7 +13,7 @@ class BinMultValidator(QtGui.QDoubleValidator):
           except ValueError:
                return self.Invalid
           
-          if (val % config.ADV_PER_CH) == 0.0:
+          if (val % configuration.ADV_PER_CH) == 0.0:
                return self.Acceptable
           else:
                return self.Intermediate
@@ -23,7 +23,7 @@ class ScanDialog(QtWidgets.QDialog):
           super(ScanDialog, self).__init__()
           
           self.ctrl = controller
-          self.scan = config.DEFAULT_SCAN_CONFIG
+          self.scan = configuration.DEFAULT_SCAN_CONFIG
           
           #set up designer interface
           ui_class, ui_widget = uic.loadUiType('scanwindow.ui')
@@ -48,32 +48,35 @@ class ScanDialog(QtWidgets.QDialog):
           #pass settings
           self.ui.channels.setValidator(QtGui.QIntValidator())
           self.ui.passes.setValidator(QtGui.QIntValidator())
-          self.ui.chPerBin.setValidator(BinMultValidator())
+#          self.ui.chPerBin.setValidator(BinMultValidator())
           self.ui.dwellTime.setValidator(QtGui.QDoubleValidator())
           self.ui.scanLengthLabel.setText('')
           
+          
           #update scan time hooks
-          for name in ['channels', 'passes', 'dwellTime']:
+          for name in ['channels', 'passes', 'dwellTime', 'chPerBin']:
                field = getattr(self.ui, name)
-               field.textChanged.connect(self.update_scan_time_label)
+               
+               field.setText(str(configuration.DEFUALT_GUI[name]))
+               field.editingFinished.connect(self.update_scan_time_label)
                
      def read_settings(self):
-          data = {'channels' : int(self.ui.channels.text),
-                  'passes' : int(self.ui.channels),
-                  'chPerBin' : float(self.ui.chPerBin.text),
-                  'dwellTime' : float(self.ui.dwellTime.text),
-                  'saveFolder' : self.ui.saveFolder.text,
-                  'savePattern' : self.ui.filePattern.text,
+          data = {'channels' : int(self.ui.channels.text()),
+                  'passes' : int(self.ui.passes.text()),
+                  'chPerBin' : float(self.ui.chPerBin.text()),
+                  'dwellTime' : float(self.ui.dwellTime.text()),
+                  'saveFolder' : self.ui.saveFolder.text(),
+                  'savePattern' : self.ui.filePattern.text(),
                   'moveOnly' : False,
                   }
-          self.scan = config.ScanConfig._make([data[f] 
-                         for f in config.ScanConfig._fields])
+          self.scan = configuration.ScanConfig._make([data[f] 
+                         for f in configuration.ScanConfig._fields])
           
      #include dummy field for use as callback
      def update_scan_time_label(self, text=''):
           self.read_settings()
           
-          seconds = self.channels * self.passes * self.dwell_time
+          seconds = self.scan.channels * self.scan.passes * self.scan.dwellTime
           tv = time.gmtime(seconds)
           
           #subtract one for 1 day offset in day value
@@ -84,7 +87,7 @@ class ScanDialog(QtWidgets.QDialog):
           
           #build output string from non-zero time values
           time_str = ''.join(['{0}{1}'.format(v,k) for (k, v) in fields if v != 0])
-          self.ui.saveFileLabel.setText(time_str)
+          self.ui.scanLengthLabel.setText(time_str)
           
      def folder_click(self, clicked=False):
           folderPath = QtWidgets.QFileDialog.getExistingDirectory(self,
@@ -98,8 +101,9 @@ class ScanDialog(QtWidgets.QDialog):
          
          file_name = pat + '1.mcs'
          path = os.path.join(fldr, file_name)
+         normed = os.path.abspath(path)
          
-         self.ui.saveFileLabel.setText(path)
+         self.ui.saveFileLabel.setText(normed)
           
           
      def start_click(self, clicked=False):

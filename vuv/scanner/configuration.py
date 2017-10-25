@@ -41,3 +41,9 @@ DEFAULT_PULSE_SETTINGS = ['0',
                           False]
 
 DEFUALT_PULSE_CONFIG = PulseConfig._make(DEFAULT_PULSE_SETTINGS)
+
+#default GUI settings
+DEFUALT_GUI = {'channels' : 100,
+               'passes' : 1,
+               'dwellTime' : 1.0,
+               'chPerBin' : 1,}
