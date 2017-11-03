@@ -3,6 +3,7 @@ import os.path
 from PyQt5 import QtGui, uic, QtWidgets
 
 import configuration
+import controller
 
 FILE_SUFFIX = ".dat"
 
@@ -125,7 +126,8 @@ if __name__ == '__main__':
     from twisted.internet import reactor
     import labrad, labrad.util, labrad.types
     cxn = labrad.connect()
-    window = ScanDialog(cxn)
+    ctrl = controller.LabradController(cxn)
+    window = ScanDialog(ctrl)
     window.show()
     
     reactor.runReturn()
