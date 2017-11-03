@@ -32,7 +32,7 @@ PULSER_FIELDS =  ['chno',
 
 PulseConfig = namedtuple('PulseConfig', PULSER_FIELDS)
 
-DEFAULT_PULSE_SETTINGS = ['0',
+DEFAULT_PULSE_CONFIG =   ['0',
                           True,
                           U.Value(10, 'us'),
                           U.Value(0, 's'),
@@ -40,7 +40,7 @@ DEFAULT_PULSE_SETTINGS = ['0',
                           True,
                           False]
 
-DEFUALT_PULSE_CONFIG = PulseConfig._make(DEFAULT_PULSE_SETTINGS)
+DEFUALT_PULSE_CONFIG = PulseConfig._make(DEFAULT_PULSE_CONFIG)
 
 #default GUI settings
 DEFUALT_GUI = {'channels' : 100,

@@ -1,4 +1,14 @@
 {
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_channels_map": true, 
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_defaults_not_replaced[ch_tpl0]": true, 
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_defaults_not_replaced[ch_tpl1]": true, 
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_defaults_not_replaced[ch_tpl2]": true, 
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_defaults_not_replaced[ch_tpl3]": true, 
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_non_defaults_replaced[ch_tpl0]": true, 
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_non_defaults_replaced[ch_tpl1]": true, 
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_non_defaults_replaced[ch_tpl2]": true, 
+  "vuv/scanner/test/test_controller.py::TestDefaultPulseSettingGen::()::test_non_defaults_replaced[ch_tpl3]": true, 
+  "vuv/scanner/test/test_controller.py::TestStartCall::()::test_starts_call": true, 
   "vuv/servers/ortec/test/test_mcsServer.py": true, 
   "vuv/servers/scanner/test/test_scanner.py": true
 }

@@ -4,7 +4,7 @@ import os.path
 from threading import Thread
 from time import sleep
 
-import config
+import configuration
 
 PULSER_TAG = 'Pulser Server'
 PULSER_DEV = 'Pulser Device'
@@ -37,7 +37,7 @@ class LabradController(object):
      def __init__(self, cxn):
           self.cxn = cxn
           self.reg_init()
-          self.config = config.DEFAULT_CONFIG
+          self.config = configuration.DEFAULT_SCAN_CONFIG
           self.settings = self.gen_default_pulse_settings()
           self.abort_flag = False
           
@@ -46,17 +46,17 @@ class LabradController(object):
           return self.config
      
      @scan_config.setter
-     def scan_config(self, configuration):
+     def scan_config(self, conf):
           #add verification code
-          self.config = configuration
+          self.config = conf
           
      def start(self):
           
           n_reverse = -1*self.config.channels - 1
           reverse = self.config._replace(channels = n_reverse,
-                                         dwellTime = config.MIN_DWELL_TIME)
+                                         dwellTime = configuration.MIN_DWELL_TIME)
           correct = self.config._replace(channels = 1,
-                                         dwellTime = config.MIN_DWELL_TIME)
+                                         dwellTime = configuration.MIN_DWELL_TIME)
           
           def genPassCalls(n):
                return [(self.configure_mcs,(self.config, n)),
@@ -119,7 +119,7 @@ class LabradController(object):
           p = self.pulser.packet()
           
           p.select_channel(0)
-          p.mode(*config.DEFAULT_TRIGGER_MODE)
+          p.mode(*configuration.DEFAULT_TRIGGER_MODE)
           
           for data in pulses.itervalues():
                self.write_packet_data(p, data)
@@ -144,10 +144,12 @@ class LabradController(object):
           p.send()
      
      def gen_default_pulse_settings(self):
-          config = dict({k : config.DEFUALT_PULSE_CONFIG for k in CH_LIST})
+          config = dict({k : configuration.DEFUALT_PULSE_CONFIG for k in CH_LIST})
           
           for (k, elems) in CH_DEFAULTS_MAP.iteritems():
+               #add the channel number to the things we're adding
                elems['chno'] = self.ch_map[k]
+               #replace all at once
                config[k] = config[k]._replace(**elems)
           
           return config
@@ -156,9 +158,9 @@ class LabradController(object):
      def config2pulse(self, settings):     
           pulse = self.gen_default_pulse_settings()
           
-          steps = abs(settings.channels) * config.ADV_PER_CH
+          steps = abs(settings.channels) * configuration.ADV_PER_CH
           #duty cycle for MCS for every Nth, 1 on, N-1 off
-          dcyc = (1, settings.ratio * config.ADV_PER_CH - 1)
+          dcyc = (1, settings.ratio * configuration.ADV_PER_CH - 1)
           
           
           replacements = {'Stepper Direction' : {'polarity' : settings.channels >= 0},
@@ -199,7 +201,7 @@ class LabradController(object):
           p.passes(1)
           p.pass_length(mcs_bins)
           p.acquisition_mode('Rep')
-          p.discriminator_level(config.MCS_DISC_LEVEL)
+          p.discriminator_level(configuration.MCS_DISC_LEVEL)
           p.discriminator_edge(True)
           p.input_impedance(True)
           p.dwell(U.Value(0.75, 'V'))

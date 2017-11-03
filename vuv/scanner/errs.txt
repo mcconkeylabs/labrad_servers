@@ -1,0 +1,165 @@
+============================= test session starts =============================
+platform win32 -- Python 2.7.14, pytest-3.2.1, py-1.4.34, pluggy-0.4.0
+rootdir: C:\local_labrad\labrad_servers, inifile: pytest.ini
+plugins: mock-1.6.0, assume-1.2
+collected 11 items
+
+test\test_controller.py sEFFFFFFFFF
+
+=================================== ERRORS ====================================
+______________ ERROR at setup of TestStartCall.test_starts_call _______________
+
+self = <vuv.scanner.test.test_controller.TestStartCall object at 0x053EBF90>
+ctrl = <vuv.scanner.test.test_controller.NoContactController object at 0x053FB130>
+mocker = <pytest_mock.MockFixture object at 0x053FB0F0>
+
+    @pytest.fixture(autouse=True)
+    def setup(self, ctrl, mocker):
+         self.ctrl = ctrl
+>        self.thread = mocker.patch('controller.Thread')
+
+test\test_controller.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Jeff\Anaconda2\envs\VUV_dev\lib\site-packages\pytest_mock.py:145: in __call__
+    return self._start_patch(self.mock_module.patch, *args, **kwargs)
+C:\Users\Jeff\Anaconda2\envs\VUV_dev\lib\site-packages\pytest_mock.py:125: in _start_patch
+    mocked = p.start()
+C:\Users\Jeff\Anaconda2\envs\VUV_dev\lib\site-packages\mock\mock.py:1500: in start
+    result = self.__enter__()
+C:\Users\Jeff\Anaconda2\envs\VUV_dev\lib\site-packages\mock\mock.py:1353: in __enter__
+    self.target = self.getter()
+C:\Users\Jeff\Anaconda2\envs\VUV_dev\lib\site-packages\mock\mock.py:1523: in <lambda>
+    getter = lambda: _importer(target)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+target = 'controller'
+
+    def _importer(target):
+        components = target.split('.')
+        import_path = components.pop(0)
+>       thing = __import__(import_path)
+E       ImportError: No module named controller
+
+C:\Users\Jeff\Anaconda2\envs\VUV_dev\lib\site-packages\mock\mock.py:1206: ImportError
+================================== FAILURES ===================================
+________________ TestDefaultPulseSettingGen.test_channels_map _________________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x053FB110>
+
+    def test_channels_map(self):
+         ch_map = {k : random.randint(1,10) for k in controller.CH_LIST}
+         self.ctrl.ch_map = ch_map
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:64: AttributeError
+_______ TestDefaultPulseSettingGen.test_non_defaults_replaced[ch_tpl0] ________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x053EBE30>
+ch_tpl = ('Stepper Advance', {'chno': 0, 'delay': Value(1.0, 'ms')})
+
+    @pytest.mark.parametrize('ch_tpl', controller.CH_DEFAULTS_MAP.iteritems())
+    def test_non_defaults_replaced(self, ch_tpl):
+         ch_name, items = ch_tpl
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:73: AttributeError
+_______ TestDefaultPulseSettingGen.test_non_defaults_replaced[ch_tpl1] ________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x054320D0>
+ch_tpl = ('MCS Advance', {'chno': 0, 'delay': Value(1.0, 'ms')})
+
+    @pytest.mark.parametrize('ch_tpl', controller.CH_DEFAULTS_MAP.iteritems())
+    def test_non_defaults_replaced(self, ch_tpl):
+         ch_name, items = ch_tpl
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:73: AttributeError
+_______ TestDefaultPulseSettingGen.test_non_defaults_replaced[ch_tpl2] ________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x05464F90>
+ch_tpl = ('MCS Start', {'chno': 0, 'mode': 'Single'})
+
+    @pytest.mark.parametrize('ch_tpl', controller.CH_DEFAULTS_MAP.iteritems())
+    def test_non_defaults_replaced(self, ch_tpl):
+         ch_name, items = ch_tpl
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:73: AttributeError
+_______ TestDefaultPulseSettingGen.test_non_defaults_replaced[ch_tpl3] ________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x053FBAF0>
+ch_tpl = ('Stepper Direction', {'chno': 0, 'width': Value(4.0, 'ms')})
+
+    @pytest.mark.parametrize('ch_tpl', controller.CH_DEFAULTS_MAP.iteritems())
+    def test_non_defaults_replaced(self, ch_tpl):
+         ch_name, items = ch_tpl
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:73: AttributeError
+_______ TestDefaultPulseSettingGen.test_defaults_not_replaced[ch_tpl0] ________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x05439BF0>
+ch_tpl = ('Stepper Advance', {'chno': 0, 'delay': Value(1.0, 'ms')})
+
+    @pytest.mark.parametrize('ch_tpl', controller.CH_DEFAULTS_MAP.iteritems())
+    def test_defaults_not_replaced(self, ch_tpl):
+         ch_name, items = ch_tpl
+         default = controller.configuration.DEFAULT_PULSE_CONFIG
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:84: AttributeError
+_______ TestDefaultPulseSettingGen.test_defaults_not_replaced[ch_tpl1] ________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x05432550>
+ch_tpl = ('MCS Advance', {'chno': 0, 'delay': Value(1.0, 'ms')})
+
+    @pytest.mark.parametrize('ch_tpl', controller.CH_DEFAULTS_MAP.iteritems())
+    def test_defaults_not_replaced(self, ch_tpl):
+         ch_name, items = ch_tpl
+         default = controller.configuration.DEFAULT_PULSE_CONFIG
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:84: AttributeError
+_______ TestDefaultPulseSettingGen.test_defaults_not_replaced[ch_tpl2] ________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x054641B0>
+ch_tpl = ('MCS Start', {'chno': 0, 'mode': 'Single'})
+
+    @pytest.mark.parametrize('ch_tpl', controller.CH_DEFAULTS_MAP.iteritems())
+    def test_defaults_not_replaced(self, ch_tpl):
+         ch_name, items = ch_tpl
+         default = controller.configuration.DEFAULT_PULSE_CONFIG
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:84: AttributeError
+_______ TestDefaultPulseSettingGen.test_defaults_not_replaced[ch_tpl3] ________
+
+self = <vuv.scanner.test.test_controller.TestDefaultPulseSettingGen object at 0x053FBF70>
+ch_tpl = ('Stepper Direction', {'chno': 0, 'width': Value(4.0, 'ms')})
+
+    @pytest.mark.parametrize('ch_tpl', controller.CH_DEFAULTS_MAP.iteritems())
+    def test_defaults_not_replaced(self, ch_tpl):
+         ch_name, items = ch_tpl
+         default = controller.configuration.DEFAULT_PULSE_CONFIG
+    
+>        ret = self.ctrl.gen_default_pulse_config()
+E        AttributeError: 'NoContactController' object has no attribute 'gen_default_pulse_config'
+
+test\test_controller.py:84: AttributeError
+================ 9 failed, 1 skipped, 1 error in 4.47 seconds =================
