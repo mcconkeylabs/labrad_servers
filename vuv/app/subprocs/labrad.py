@@ -21,6 +21,7 @@ class LabradExecutable(ProcessWrapper):
           self.booted = False
           self.check_regex = re.compile(self.ok_message)
           
+          #connect to poll output
           self.outputAvailable.connect(self._check_status)
           
      def running(self):
@@ -37,10 +38,14 @@ class LabradExecutable(ProcessWrapper):
                     self.booted = True
           
 class ManagerProcess(LabradExecutable):
+     nameDefault = 'Manager'
+     
      ok_message = MGR_OK_STATUS
      exe_path = D.MANAGER_SCRIPT
      
 class WebServerProcess(LabradExecutable):
+     nameDefault = 'Web Server'
+    
      ok_message = WEB_OK_STATUS
      exe_path = D.WEB_SCRIPT
      
@@ -69,5 +74,8 @@ class LabradNodeProcess(ProcessWrapper):
           
           servers = set(x for (n, x) in self.cxn.manager.servers())
           return self._start_set.issubset(servers)
+      
+     def name(self):
+          return 'Node ' + self.node_name
           
           

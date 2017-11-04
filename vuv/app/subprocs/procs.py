@@ -21,6 +21,9 @@ def labrad_environ():
     return os.environ
     
 class ProcessWrapper(QObject):
+    
+    nameDefault = "Process"
+    
     outputAvailable = pyqtSignal('QString') 
      
     def __init__(self, args = [], env = None):
@@ -29,6 +32,10 @@ class ProcessWrapper(QObject):
     
     def __del__(self):
         self.stop()
+        
+    @property
+    def name(self):
+        return self.nameDault
         
     def start(self):
         #shell flag ensures batch scripts run
@@ -67,12 +74,19 @@ class ProcessWrapper(QObject):
     def _set_env(self, env=None):
         self.env = env if env is not None else labrad_environ()
 
-class NodeWrapper(ProcessWrapper):
-    BASE_ARGS = ['python', '-m', 'labrad.node']
-    
-    def __init__(self, name, env=None):
-        args = self.BASE_ARGS + ['--name', name]
-        super(NodeWrapper, self).__init__(args, env)
+#class NodeWrapper(ProcessWrapper):
+#    BASE_ARGS = ['python', '-m', 'labrad.node']
+#    
+#    def __init__(self, node_name, env=None):
+#        self.node_name = node_name
+#        self.name = 'Node ' + node_name
+#        
+#        args = self.BASE_ARGS + ['--name', node_name]
+#        super(NodeWrapper, self).__init__(args, env)
+#        
+#    @property
+#    def name(self):
+#        return self.name
         
 #class ServerWrapper(ProcessWrapper):
 #    from twisted.internet import reactor 
