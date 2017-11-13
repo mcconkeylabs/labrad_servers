@@ -72,9 +72,9 @@ class LabradController(object):
                        (self.configure_scan_reset, ()),
                        ]
                
-          call_list = IT.chain([genPassCalls(n) for n in 
-                                     range(1, self.config.passes + 1)])
-               
+          call_list = IT.chain.from_iterable([genPassCalls(n) for n in 
+                                              range(1, self.config.passes + 1)])
+                                     
           def run_scan(calls):
                for (call, args) in calls:
                     call(*args)
@@ -194,7 +194,7 @@ class LabradController(object):
           mcs_bins = int(run.channels * run.chPerBin)
           
           suffix = '' if pass_num is None else str(pass_num)
-          file_name = self.savePattern + suffix + '.mcs'
+          file_name = run.savePattern + suffix + '.mcs'
           file_path = os.path.abspath(os.path.join(run.saveFolder, file_name))
           
           p = self.mcs.packet()
@@ -204,7 +204,7 @@ class LabradController(object):
           p.discriminator_level(configuration.MCS_DISC_LEVEL)
           p.discriminator_edge(True)
           p.input_impedance(True)
-          p.dwell(U.Value(0.75, 'V'))
+          p.dwell_trigger(U.Value(0.75, 'V'))
           p.external_trigger(True)
           p.start(file_path)
           p.send()

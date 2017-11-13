@@ -65,7 +65,8 @@ DEFAULT_PARAMETERS = {'Length' : 1024,
                       'DiscEdge' : 'Rising',
                       'Impedance' : True,
                       'Ramp' : [U.Value(0.0, 'V')],
-                      'Dwell' : (False, U.Value(0.5, 'V')),
+                      'DwellTime' : (False, U.Value(0.5, 's')),
+                      'DwellTrigger' : (True, U.Value(0.5, 'V')),
                       'ExtTrigger' : False
                      } 
                      
@@ -89,12 +90,15 @@ class MCSServer(LabradServer):
     
     @inlineCallbacks
     def initServer(self):
-#        self.reg = self.client.registry
-#        yield self._loadRegistry()
-#        
-#        self.tmpDir = T.mkdtemp()
-#        self.jobPath = OP.join(self.tmpDir, JOB_NAME)
+        print "Init mcs"
+        self.reg = self.client.registry
+        yield self._loadRegistry()
+        print "Loaded registry"
+        
+        self.tmpDir = T.mkdtemp()
+        self.jobPath = OP.join(self.tmpDir, JOB_NAME)
         self._killed = False
+        
         yield LabradServer.initServer(self)
         
     @inlineCallbacks
@@ -116,6 +120,8 @@ class MCSServer(LabradServer):
         self.exePath = resp['exe']
         self.params = dict([(k, resp[k]) for k in\
                             DEFAULT_PARAMETERS.keys()])
+                            
+        print self.params
     
     @inlineCallbacks
     def _updateRegistry(self):
@@ -284,40 +290,56 @@ class MCSServer(LabradServer):
             self.params['Ramp'] = [v for v in vs if v is not None]
         return self.params['Ramp']
     
-    @setting(107, 'Dwell',
-             dwell = ['v[s] : Internal dwell time (seconds)',
-                      'v[V] : External dwell threshold (voltage)'],
-             returns = ['(sv[s])', '(sv[V])'])
-    def dwell(self, c, dwell=None):
-        '''Set/query the dwell trigger.
+    @setting(107, 'Dwell Time',
+             dTime = 'v[s]', returns = '(bv[s])')
+    def dwell_time(self, c, dTime=None):
+        '''Set/query dwell time and trigger.
+        Input :
+        time - Dwell time per pass in seconds. If None, returns current settings
         
-        Input:
-        dwell - Time in seconds if internal dwell timer used
-              - Voltage threshold of external advance signal used
-              
         Returns:
-        (type, parameter) - Type is 'Internal' or 'External' with
-                            associated dwell time/threshold
+        (state, time) - state is True if internal dwell time set
+                        time is current dwell time setting
         '''
-        if dwell is not None:
-            if dwell.isCompatible('s'):
-                if dwell['s'] < jobs.DWELL_MIN or dwell['s'] > jobs.DWELL_MAX:
-                    string = 'Dwell time must be between %f and %f seconds' %\
-                             (jobs.DWELL_MIN, jobs.DWELL_MAX)
-                    raise Error(string)
-            else:
-                if dwell['V'] < jobs.DISC_MIN or dwell['V'] > jobs.DISC_MAX:
-                    string = 'Dwell trigger threshold must be between %f and %f volts' %\
-                             (jobs.DISC_MIN, jobs.DISC_MAX)
-                    raise Error(string)
-                    
-            self.params['Dwell'] = (dwell.isCompatible('s'), dwell)
+        if dTime is not None:
+            if (dTime['s'] < jobs.DWELL_MIN) or (dTime['s'] > jobs.DWELL_MAX):
+                print '1 - {} AND 2 - {}'.format(dTime['s'] < jobs.DWELL_MIN, dTime['s'] > jobs.DWELL_MAX)
+                string = 'Dwell time {} must be between {} and {}'.format(dTime['s'], jobs.DWELL_MIN, jobs.DWELL_MAX)
+                raise Error(string)
+            
+            #enable internal trigger and disable external
+            self.params['DwellTime'] = (True, dTime)
+            
+            _, thresh = self.params['DwellTrigger']
+            self.params['DwellTrigger'] = (False, thresh)
+            
+        return self.params['DwellTime']
         
-        isInt, value = self.params['Dwell']
-        string = 'Internal' if isInt else 'External'
-        return (string, value)
+    @setting(108, 'Dwell Trigger', dTrig = 'v[V]', returns='(bv[V])')
+    def dwell_trigger(self, c, dTrig=None):
+        '''Set/query external dwell trigger.
+        Input:
+        dTrig - Trigger threshold in votes. None will query current setting.
         
-    @setting(108, 'External Trigger',
+        Returns:
+        (state, trigger) - state is True if external dwell trigger set
+                           trigger is current external dwell threshold
+        '''
+        if dTrig is not None:
+            if dTrig['V'] < jobs.DISC_MIN or dTrig['V'] > jobs.DISC_MAX:
+                print '1 - {} AND 2 - {}'.format(dTrig['V'] < jobs.DISC_MIN, dTrig['V'] > jobs.DISC_MAX)
+                string = 'Dwell time {} must be between {} and {}'.format(dTrig['s'], jobs.DISC_MIN, jobs.DISC_MAX)
+                raise Error(string)
+            
+            #enable external trigger and disable internal
+            self.params['DwellTrigger'] = (True, dTrig)
+            
+            _, per = self.params['DwellTime']
+            self.params['DwellTime'] = (False, per)
+            
+        return self.params['DwellTrigger']
+        
+    @setting(110, 'External Trigger',
              external = 'b', returns='b')
     def external_trigger(self, c, external=None):
         '''Set/query start trigger setting.
