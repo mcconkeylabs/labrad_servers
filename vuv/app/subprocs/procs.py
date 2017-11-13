@@ -27,6 +27,7 @@ class ProcessWrapper(QObject):
     outputAvailable = pyqtSignal('QString') 
      
     def __init__(self, args = [], env = None):
+        super(ProcessWrapper, self).__init__()
         self.args = args
         self._set_env(env)
     
@@ -35,7 +36,7 @@ class ProcessWrapper(QObject):
         
     @property
     def name(self):
-        return self.nameDault
+        return self.nameDefault
         
     def start(self):
         #shell flag ensures batch scripts run
@@ -63,6 +64,7 @@ class ProcessWrapper(QObject):
     def _poll_proc(self):
          while True:
               ret = self.proc.stdout.readline()
+              print '[{}]- {}'.format(self.name, ret)
               
               #process will always kill when other process dies
               #and no output, thread always dies
