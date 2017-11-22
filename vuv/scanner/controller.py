@@ -160,7 +160,7 @@ class LabradController(object):
           
           steps = abs(settings.channels) * configuration.ADV_PER_CH
           #duty cycle for MCS for every Nth, 1 on, N-1 off
-          dcyc = (1, settings.ratio * configuration.ADV_PER_CH - 1)
+          dcyc = (1, settings.chPerBin * configuration.ADV_PER_CH - 1)
           
           
           replacements = {'Stepper Direction' : {'polarity' : settings.channels >= 0},

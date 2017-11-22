@@ -65,8 +65,7 @@ DEFAULT_PARAMETERS = {'Length' : 1024,
                       'DiscEdge' : 'Rising',
                       'Impedance' : True,
                       'Ramp' : [U.Value(0.0, 'V')],
-                      'DwellTime' : (False, U.Value(0.5, 's')),
-                      'DwellTrigger' : (True, U.Value(0.5, 'V')),
+                      'Dwell' : (True, U.Value(0.5, 's')),
                       'ExtTrigger' : False
                      } 
                      
@@ -308,12 +307,16 @@ class MCSServer(LabradServer):
                 raise Error(string)
             
             #enable internal trigger and disable external
-            self.params['DwellTime'] = (True, dTime)
+            self.params['Dwell'] = (True, dTime)
             
-            _, thresh = self.params['DwellTrigger']
-            self.params['DwellTrigger'] = (False, thresh)
-            
-        return self.params['DwellTime']
+        flag, param = self.params['Dwell']
+        
+        #flag true = internal trigger
+        if flag:
+            return (flag, param)
+        else:
+            return (flag, U.Value(0,'s'))
+        
         
     @setting(108, 'Dwell Trigger', dTrig = 'v[V]', returns='(bv[V])')
     def dwell_trigger(self, c, dTrig=None):
@@ -332,12 +335,15 @@ class MCSServer(LabradServer):
                 raise Error(string)
             
             #enable external trigger and disable internal
-            self.params['DwellTrigger'] = (True, dTrig)
+            self.params['Dwell'] = (False, dTrig)
             
-            _, per = self.params['DwellTime']
-            self.params['DwellTime'] = (False, per)
-            
-        return self.params['DwellTrigger']
+        flag, param = self.params['Dwell']
+        
+        #flag false = external trigger
+        if not flag:
+            return (flag, param)
+        else:
+            return (flag, U.Value(0,'V'))
         
     @setting(110, 'External Trigger',
              external = 'b', returns='b')
