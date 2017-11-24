@@ -1,5 +1,6 @@
 import time, sys
 import os.path
+import labrad.units as U
 from PyQt5 import QtGui, uic, QtWidgets
 
 import configuration
@@ -65,7 +66,7 @@ class ScanDialog(QtWidgets.QDialog):
           data = {'channels' : int(self.ui.channels.text()),
                   'passes' : int(self.ui.passes.text()),
                   'chPerBin' : float(self.ui.chPerBin.text()),
-                  'dwellTime' : float(self.ui.dwellTime.text()),
+                  'dwellTime' : U.Value(float(self.ui.dwellTime.text()), 's'),
                   'saveFolder' : self.ui.saveFolder.text(),
                   'savePattern' : self.ui.filePattern.text(),
                   'moveOnly' : False,
@@ -77,7 +78,7 @@ class ScanDialog(QtWidgets.QDialog):
      def update_scan_time_label(self, text=''):
           self.read_settings()
           
-          seconds = self.scan.channels * self.scan.passes * self.scan.dwellTime
+          seconds = self.scan.channels * self.scan.passes * self.scan.dwellTime['s']
           tv = time.gmtime(seconds)
           
           #subtract one for 1 day offset in day value

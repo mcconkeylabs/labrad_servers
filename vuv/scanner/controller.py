@@ -137,7 +137,7 @@ class LabradController(object):
           p.mode('Burst', abs(run.channels))
           
           print 'Trig per ({}): {}'.format(type(run.dwellTime),run.dwellTime)
-          p.trigger_period(U.Value(run.dwellTime, 's'))
+          p.trigger_period(run.dwellTime)
           
           #set individual pulse channels
           for data in pulses.itervalues():

@@ -264,6 +264,7 @@ class BNCBaseServer(DeviceServer):
              period = 'v[s] : Set trigger period',
              returns='v[s] : Current trigger period')
     def trigger_period(self, c, period = None):
+        print "BServer Per: {}".format(period)
         per = yield self.selectedDevice(c).trigger_period(period)
         returnValue(per)
         
