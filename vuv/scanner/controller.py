@@ -135,6 +135,8 @@ class LabradController(object):
           #configure master trigger settings
           p.select_channel(0)
           p.mode('Burst', abs(run.channels))
+          
+          print 'Trig per ({}): {}'.format(type(run.dwellTime),run.dwellTime)
           p.trigger_period(U.Value(run.dwellTime, 's'))
           
           #set individual pulse channels
@@ -160,7 +162,7 @@ class LabradController(object):
           
           steps = abs(settings.channels) * configuration.ADV_PER_CH
           #duty cycle for MCS for every Nth, 1 on, N-1 off
-          dcyc = (1, settings.chPerBin * configuration.ADV_PER_CH - 1)
+          dcyc = (1, int(settings.chPerBin * configuration.ADV_PER_CH - 1))
           
           
           replacements = {'Stepper Direction' : {'polarity' : settings.channels >= 0},
@@ -184,7 +186,12 @@ class LabradController(object):
           p.state(data.state)
           p.width(data.width)
           p.delay(data.delay)
-          p.mode(*data.mode)
+          
+          if type(data.mode) is str:
+              p.mode(data.mode)
+          else:
+              p.mode(data.mode[0], data.mode[1])
+              
           p.polarity(data.polarity)
           p.output(data.output)
           

@@ -63,11 +63,14 @@ class BNCPulser(DeviceWrapper):
                 
         if value is not None:
             setTag = '%s %s' % (cmd, inp(value))
+            print "Sending command to BNC: {}".format(setTag)
             yield self.send(setTag)
         else:
             queryTag = cmd + '?'
             resp = yield self.query(queryTag)
-            returnValue(outp(resp))
+            value = outp(resp)
+#            returnValue(outp(resp))
+        returnValue(value)
     
     @inlineCallbacks
     def channel_list(self):
@@ -126,15 +129,18 @@ class BNCPulser(DeviceWrapper):
                 yield self._param(voltTag, adjVoltage, 'voltage', ch)
         
     @inlineCallbacks
-    def mode(self, ch, mode = None, modeParameter = None):
-        if mode is not None:
-            if mode not in MODE_TYPES.keys():
+    def mode(self, ch, mType = None, modeParameter = None):
+        print mType
+        print modeParameter
+        
+        if mType is not None:
+            if mType not in MODE_TYPES.keys():
                 raise Error('Mode type invalid.')
                 
         tag = ':MODE' if ch == 0 else ':CMODE'
-        modeVal = yield self._param(tag, mode, 'mode', ch)
+        modeVal = yield self._param(tag, mType, 'mode', ch)
         
-        m = modeVal if mode is None else mode
+        m = modeVal if mType is None else mType
         if m == 'Burst':
             param = yield self._param(':BCO', modeParameter,'int', ch)
         elif m == 'DutyCycle':
@@ -145,8 +151,8 @@ class BNCPulser(DeviceWrapper):
         else:
             param = 0
           
-        if mode is None:
-            returnValue((modeVal, param))
+        print 'modeVal: {}, param: {}'.format(m, param)
+        returnValue((m, param))
         
     def channel_modes(self, ch):
         return MODE_TYPES.keys()

@@ -29,9 +29,9 @@ class BNC555Pulser(BNCPulser):
         return CMODE_TYPES.keys() if ch != 0 else MODE_TYPES.keys()
         
     @inlineCallbacks
-    def mode(self, ch, mode = None, modeParameter = None):
+    def mode(self, ch, mType = None, modeParameter = None):
         tag, modeType = (':MODE', 'mode') if ch == 0 else (':CMODE', 'cmode')
-        modeVal = yield self._param(tag, mode, modeType, ch)
+        modeVal = yield self._param(tag, mType, modeType, ch)
         
         if modeVal == 'Burst':
             param = yield self._param(':BCO', modeParameter,'int', ch)

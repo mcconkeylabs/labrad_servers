@@ -225,32 +225,33 @@ class BNCBaseServer(DeviceServer):
         
         (dev, ch) = self._sdc(c)
         resp = yield dev.output(ch, adj, voltage)            
-        returnValue(resp)
+        returnValue(resp)   
             
     @setting(206, 'Mode',
-             mode = [':Query current mode', 's : Mode type'],
+             mType = 's : Mode type',
              parameter = ['w', '(ww)'],
-             returns = ['',
-                        '(sw) : Mode with optional parameter',
+             returns = ['(sw) : Mode with optional parameter',
                         '(s(ww)) : DutyCycle with (on,off) Ns'])
-    def mode(self, c, mode = None, parameter = None):
+    def mode(self, c, mType = None, parameter = None):
         '''Set/query channel/trigger mode type.
         Possible modes are Normal, Single, Burst, Divide, Duty Cycle.
         Not all modes are supported by all channels on all devices. Call
         list_modes on the channel to see supported types.
         
         parameters:
-        mode      None for query, mode type for setting
+        mType      None for query, mode type for setting
         parameter Integer N for burst, divide modes
                   Tuple (on, off) for duty cycle
                   
         returns:
-        (mode, parameter)   Same format as input.
+        (mType, parameter)   Same format as input.
         '''
         
         #MODE_TYPES not iterable?
         (dev, ch) = self._sdc(c)
-        resp = yield dev.mode(ch, mode, parameter)
+        
+        print 'Base_server mode {} : {}'.format(mType, parameter)
+        resp = yield dev.mode(ch, mType, parameter)
         returnValue(resp)
         
     @setting(300, 'Run State',
@@ -260,9 +261,8 @@ class BNCBaseServer(DeviceServer):
         returnValue(state)
     
     @setting(301, 'Trigger Period',
-             period = [': Query trigger period',
-                       'v[s] : Set trigger period'],
-             returns=['', 'v[s] : Current trigger period'])
+             period = 'v[s] : Set trigger period',
+             returns='v[s] : Current trigger period')
     def trigger_period(self, c, period = None):
         per = yield self.selectedDevice(c).trigger_period(period)
         returnValue(per)
@@ -276,8 +276,7 @@ class BNCBaseServer(DeviceServer):
                 yield dev.state(n, True)
     
     @setting(303, 'Enable',
-             channels = [': Query currently enabled channels',
-                         '*w : List of channels to enable'],
+             channels = '*w : List of channels to enable',
              only = 'b : Enable ONLY these channels',
              returns=['', '*w : List of currently enabled channels'])
     def enable(self, c, channels=None, only=False):
