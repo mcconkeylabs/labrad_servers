@@ -4,7 +4,7 @@ import labrad.units as U
 #setup constants
 ADV_PER_CH = 8
 DEFAULT_TRIGGER_MODE = ('Burst', 1000)
-MIN_DWELL_TIME = U.Value(50, 'ms')
+MIN_DWELL_TIME = 50E-3
 MCS_DISC_LEVEL = U.Value(1.5, 'V')
 
 #scan configuration

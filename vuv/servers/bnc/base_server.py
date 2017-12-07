@@ -72,8 +72,9 @@ class BNCBaseServer(DeviceServer):
              raise Error('Pulser is killed. Cannot start.')
              
         dev = self.selectedDevice(c)
-        
+        print "Starting pulser, now"
         def run():
+            print "Run poll started"
             state = True
             period = yield dev.trigger_period()
             
@@ -85,13 +86,17 @@ class BNCBaseServer(DeviceServer):
             #this ordering ensures that checks are delayed
             #and won't begin before pulses actually start
             while state:
+                print "Pulser State: {}".format(state)
                 time.sleep(period)
                 state = yield dev.run_state()
                 
             self.pulserStopped(dev.name)
         
         #this call won't block client
-        threads.callMultipleInThread([(run, [], {})])
+        threads.callMultipleInThread([(run, [], {})])   
+##        yield threads.deferToThread(run)
+#        yield dev.state(0, True)
+#        self.pulserStarted(dev.name)
     
     @setting(102, 'Stop', kill='b')
     def stop(self, c, kill=None):

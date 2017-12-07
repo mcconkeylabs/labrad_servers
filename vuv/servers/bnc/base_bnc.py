@@ -112,7 +112,6 @@ class BNCPulser(DeviceWrapper):
         
         if isAdjustable is None:
             mode = yield self._param(modeTag, None, 'output', ch)
-            print 'Mode is %s' % mode
             isAdj = mode == 'Adjustable'
             
             if isAdj:
@@ -130,8 +129,6 @@ class BNCPulser(DeviceWrapper):
         
     @inlineCallbacks
     def mode(self, ch, mType = None, modeParameter = None):
-        print mType
-        print modeParameter
         
         if mType is not None:
             if mType not in MODE_TYPES.keys():
@@ -150,8 +147,7 @@ class BNCPulser(DeviceWrapper):
             param = (pco, nco)
         else:
             param = 0
-          
-        print 'modeVal: {}, param: {}'.format(m, param)
+        
         returnValue((m, param))
         
     def channel_modes(self, ch):

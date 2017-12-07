@@ -135,8 +135,6 @@ class LabradController(object):
           #configure master trigger settings
           p.select_channel(0)
           p.mode('Burst', abs(run.channels))
-          
-          print 'Trig per ({}): {}'.format(type(run.dwellTime),run.dwellTime)
           p.trigger_period(run.dwellTime)
           
           #set individual pulse channels
@@ -218,11 +216,14 @@ class LabradController(object):
           
      def start_pulser(self):
           self.pulser.start()
+          print "Start Pulser: {}".format(self.pulser.run_state())
           
      def wait_pulser(self):
-          state = self.pulser.run_state()
+          state = True        
           while state:
                sleep(self.config.dwellTime / 2)
+               state = self.pulser.run_state()
+               print "Wait Pulser: {}".format(state)
                
      def configure_scan_reset(self):
           self.init_pulser()
